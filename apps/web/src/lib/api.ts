@@ -190,4 +190,55 @@ export class ApiClient {
       usersInQueue?: number;
     }>('/matching/status', {}, true);
   }
+
+  // ============================================
+  // CHAT
+  // ============================================
+
+  static async getChat(chatId: string) {
+    return this.request(`/chats/${chatId}`, {}, true);
+  }
+
+  static async getChatMessages(chatId: string, limit?: number, before?: Date) {
+    const params = new URLSearchParams();
+    if (limit) params.append('limit', limit.toString());
+    if (before) params.append('before', before.toISOString());
+
+    return this.request<{ messages: any[] }>(
+      `/chats/${chatId}/messages${params.toString() ? '?' + params.toString() : ''}`,
+      {},
+      true
+    );
+  }
+
+  static async sendMessage(chatId: string, content: string, type: string = 'TEXT') {
+    return this.request(`/chats/${chatId}/messages`, {
+      method: 'POST',
+      body: JSON.stringify({ content, type }),
+    }, true);
+  }
+
+  static async extendChatTime(chatId: string, minutes: number = 10) {
+    return this.request(`/chats/${chatId}/extend`, {
+      method: 'POST',
+      body: JSON.stringify({ minutes }),
+    }, true);
+  }
+
+  static async requestMatch(chatId: string) {
+    return this.request(`/chats/${chatId}/match/request`, {
+      method: 'POST',
+    }, true);
+  }
+
+  static async respondToMatchRequest(chatId: string, accept: boolean) {
+    return this.request(`/chats/${chatId}/match/respond`, {
+      method: 'POST',
+      body: JSON.stringify({ accept }),
+    }, true);
+  }
+
+  static async getUserActiveChats() {
+    return this.request<{ chats: any[] }>('/chats/active', {}, true);
+  }
 }

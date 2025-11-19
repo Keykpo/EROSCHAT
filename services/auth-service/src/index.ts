@@ -9,7 +9,10 @@ import authRoutes from './routes/authRoutes';
 import userRoutes from './routes/userRoutes';
 import profileRoutes from './routes/profileRoutes';
 import matchingRoutes from './routes/matchingRoutes';
+import chatRoutes from './routes/chatRoutes';
 import { initializeWebSocketService } from './services/websocketService';
+import { initializeChatTerminationService } from './services/chatTerminationService';
+import { connectMongoDB } from './config/mongodb';
 
 // Load environment variables
 dotenv.config();
@@ -55,6 +58,7 @@ app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/profiles', profileRoutes);
 app.use('/api/v1/matching', matchingRoutes);
+app.use('/api/v1/chats', chatRoutes);
 
 // ============================================
 // ERROR HANDLING
@@ -73,11 +77,27 @@ initializeWebSocketService(httpServer);
 // START SERVER
 // ============================================
 
-httpServer.listen(PORT, () => {
-  logger.info(`🚀 Auth Service running on port ${PORT}`);
-  logger.info(`📝 Environment: ${process.env.NODE_ENV}`);
-  logger.info(`🔌 WebSocket server initialized`);
-});
+const startServer = async () => {
+  try {
+    // Connect to MongoDB
+    await connectMongoDB();
+
+    // Initialize chat termination service
+    initializeChatTerminationService();
+
+    // Start HTTP server
+    httpServer.listen(PORT, () => {
+      logger.info(`🚀 Auth Service running on port ${PORT}`);
+      logger.info(`📝 Environment: ${process.env.NODE_ENV}`);
+      logger.info(`🔌 WebSocket server initialized`);
+    });
+  } catch (error) {
+    logger.error('Failed to start server:', error);
+    process.exit(1);
+  }
+};
+
+startServer();
 
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (err: Error) => {

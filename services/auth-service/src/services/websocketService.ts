@@ -84,13 +84,47 @@ export class WebSocketService {
         });
       });
 
-      // Handle typing indicators
-      socket.on('typing', (data: { chatId: string }) => {
+      // ============================================
+      // CHAT EVENTS
+      // ============================================
+
+      // Join chat room
+      socket.on('chat:join', (data: { chatId: string }) => {
+        socket.join(data.chatId);
+        logger.info(`User ${userId} joined chat room ${data.chatId}`);
+        socket.emit('chat:joined', { chatId: data.chatId });
+      });
+
+      // Leave chat room
+      socket.on('chat:leave', (data: { chatId: string }) => {
+        socket.leave(data.chatId);
+        logger.info(`User ${userId} left chat room ${data.chatId}`);
+      });
+
+      // Typing indicators
+      socket.on('typing:start', (data: { chatId: string }) => {
         socket.to(data.chatId).emit('user-typing', { userId });
       });
 
-      socket.on('stop-typing', (data: { chatId: string }) => {
+      socket.on('typing:stop', (data: { chatId: string }) => {
         socket.to(data.chatId).emit('user-stopped-typing', { userId });
+      });
+
+      // Message sent notification (real-time broadcast)
+      socket.on('message:sent', (data: { chatId: string; message: any }) => {
+        socket.to(data.chatId).emit('message:received', data.message);
+      });
+
+      // Match request events
+      socket.on('match:request', (data: { chatId: string }) => {
+        socket.to(data.chatId).emit('match:requested', { userId });
+      });
+
+      socket.on('match:respond', (data: { chatId: string; accepted: boolean }) => {
+        socket.to(data.chatId).emit('match:response', {
+          userId,
+          accepted: data.accepted,
+        });
       });
     });
   }
