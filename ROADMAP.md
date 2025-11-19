@@ -10,12 +10,13 @@
 
 ## ✅ PROGRESO ACTUAL (Actualizado)
 
-### 🎯 Estado: MVP COMPLETO + Mobile App Implementada
+### 🎯 Estado: MVP + Mobile + Monetización Implementada
 
-**Sprints Completados:** 7/24 (29% del roadmap total)
+**Sprints Completados:** 8/24 (33% del roadmap total)
 **MVP Core:** ✅ 100% COMPLETO
 **Mobile App:** ✅ 100% COMPLETO
-**Funcionalidad:** ✅ Totalmente funcional (Web + Mobile)
+**Monetización:** ✅ 100% COMPLETO
+**Funcionalidad:** ✅ Totalmente funcional (Web + Mobile + Payments)
 
 ### Sprints Implementados:
 
@@ -91,16 +92,33 @@
 - Expo Image Picker para subida de fotos
 - Misma API que el web (reutilización total)
 
+#### ✅ Sprint 8: Monetización (Stripe + Premium) (COMPLETO)
+- Stripe SDK integrado en backend
+- SubscriptionService completo con Stripe API
+- Sistema de suscripciones (mensual $9.99, anual $79.99)
+- Webhook handling para eventos de Stripe
+- 5 endpoints de suscripción (checkout, cancel, resume, portal, current)
+- PremiumFeaturesService con límites para free vs premium:
+  - Free: 5 chats/día, 10 matches/mes, 3 fotos
+  - Premium: chats ilimitados, matches ilimitados, 6 fotos, 5 super likes/día
+- Página /premium con pricing cards y features showcase
+- Página /premium/success post-pago
+- Stripe Checkout integration
+- Stripe Customer Portal integration
+- Middleware de premium para endpoints protegidos
+- Endpoint GET /api/v1/users/me/limits para ver límites del usuario
+
 ### Arquitectura Actual:
 
 **Backend:**
 - ✅ Node.js 20 + Express + TypeScript (Auth Service)
 - ✅ Python 3.11 + FastAPI (Matching Service)
-- ✅ PostgreSQL (users, profiles, chats, matches, blocks)
+- ✅ PostgreSQL (users, profiles, chats, matches, blocks, subscriptions)
 - ✅ MongoDB (messages, chat metadata, reports)
 - ✅ Redis (queue management, caching)
 - ✅ Socket.io (WebSocket real-time)
 - ✅ OpenAI API (content moderation)
+- ✅ Stripe API (payments, subscriptions)
 - ✅ Prisma ORM + Mongoose ODM
 - ✅ JWT Authentication + bcrypt
 
@@ -137,6 +155,8 @@
 6. ✅ /chat/[id] - Chat en tiempo real
 7. ✅ /matches - Lista de matches activos
 8. ✅ /admin - Panel de moderación
+9. ✅ /premium - Página de suscripción Premium
+10. ✅ /premium/success - Confirmación de pago exitoso
 
 ### Pantallas Mobile Implementadas:
 1. ✅ LoginScreen - Autenticación con email/password
@@ -147,14 +167,16 @@
 6. ✅ MatchesScreen - Lista de matches con perfiles
 7. ✅ ProfileScreen - Vista y edición de perfil
 
-### Endpoints REST API Implementados: 42+
+### Endpoints REST API Implementados: 49+
 - Auth: 6 endpoints
-- Users: 4 endpoints
+- Users: 5 endpoints (agregado /me/limits)
 - Profiles: 5 endpoints
 - Matching: 3 endpoints
 - Chats: 7 endpoints
 - Matches: 4 endpoints
 - Reports: 6 endpoints
+- Subscriptions: 5 endpoints (checkout, me, cancel, resume, portal)
+- Webhooks: 1 endpoint (Stripe webhook)
 
 ### WebSocket Events: 20+
 - Connection management
@@ -165,16 +187,18 @@
 - Queue updates
 
 ### Métricas del Proyecto:
-- **Archivos creados:** 95+
-- **Líneas de código backend:** ~10,000+
-- **Líneas de código frontend web:** ~5,000+
+- **Archivos creados:** 106+
+- **Líneas de código backend:** ~11,500+
+- **Líneas de código frontend web:** ~5,400+
 - **Líneas de código mobile:** ~3,000+
-- **Total líneas de código:** ~18,000+
-- **Modelos de datos:** 13 (PostgreSQL + MongoDB)
-- **Servicios backend:** 8
+- **Total líneas de código:** ~20,000+
+- **Modelos de datos:** 15 (PostgreSQL + MongoDB) - agregados Subscription, Transaction
+- **Servicios backend:** 10 (agregados SubscriptionService, PremiumFeaturesService)
 - **Componentes React Web:** 12+
+- **Pantallas/Páginas Web:** 10
 - **Pantallas React Native:** 7
 - **Plataformas soportadas:** Web, iOS, Android
+- **Integraciones externas:** OpenAI, Stripe
 
 ### Lo Que Funciona:
 ✅ Registro e inicio de sesión completo (Web + Mobile)
@@ -188,6 +212,10 @@
 ✅ Panel de administración (Web)
 ✅ Suspensiones y baneos
 ✅ App móvil cross-platform (iOS + Android) con Expo
+✅ Sistema de monetización completo con Stripe
+✅ Suscripciones Premium (mensual/anual)
+✅ Límites para usuarios free vs premium
+✅ Stripe Checkout y Customer Portal
 
 ### Próximos Pasos Recomendados:
 
