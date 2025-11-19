@@ -1,6 +1,7 @@
 import { Response, NextFunction } from 'express';
 import { AuthRequest } from '../middleware/authMiddleware';
 import { UserService } from '../services/userService';
+import PremiumFeaturesService from '../services/premiumFeaturesService';
 import { z } from 'zod';
 
 const updateUserSchema = z.object({
@@ -65,6 +66,22 @@ export class UserController {
       const stats = await UserService.getUserStats(userId);
 
       res.status(200).json(stats);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // ============================================
+  // GET /api/v1/users/me/limits
+  // ============================================
+
+  static async getUserLimits(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const userId = req.userId!;
+      const user = await UserService.getCurrentUser(userId);
+      const limits = await PremiumFeaturesService.getUserLimits(userId, user.isPremium);
+
+      res.status(200).json(limits);
     } catch (error) {
       next(error);
     }

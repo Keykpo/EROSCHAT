@@ -290,4 +290,37 @@ export class ApiClient {
       method: 'POST',
     }, true);
   }
+
+  // ============================================
+  // SUBSCRIPTIONS & PAYMENTS
+  // ============================================
+
+  static async createCheckoutSession(plan: 'monthly' | 'yearly' = 'monthly') {
+    return this.request<{ sessionId: string; url: string }>('/subscriptions/checkout', {
+      method: 'POST',
+      body: JSON.stringify({ plan }),
+    }, true);
+  }
+
+  static async getCurrentSubscription() {
+    return this.request<{ subscription: any | null }>('/subscriptions/me', {}, true);
+  }
+
+  static async cancelSubscription() {
+    return this.request('/subscriptions/cancel', {
+      method: 'POST',
+    }, true);
+  }
+
+  static async resumeSubscription() {
+    return this.request('/subscriptions/resume', {
+      method: 'POST',
+    }, true);
+  }
+
+  static async createPortalSession() {
+    return this.request<{ url: string }>('/subscriptions/portal', {
+      method: 'POST',
+    }, true);
+  }
 }

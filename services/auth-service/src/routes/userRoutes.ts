@@ -27,4 +27,7 @@ router.delete('/me', UserController.deleteUser);
 // GET /api/v1/users/me/stats - Get user stats
 router.get('/me/stats', UserController.getUserStats);
 
+// GET /api/v1/users/me/limits - Get user limits (premium features)
+router.get('/me/limits', UserController.getUserLimits);
+
 export default router;

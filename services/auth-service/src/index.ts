@@ -12,6 +12,8 @@ import matchingRoutes from './routes/matchingRoutes';
 import chatRoutes from './routes/chatRoutes';
 import matchRoutes from './routes/matchRoutes';
 import reportRoutes from './routes/reportRoutes';
+import subscriptionRoutes from './routes/subscriptionRoutes';
+import webhookRoutes from './routes/webhookRoutes';
 import { initializeWebSocketService } from './services/websocketService';
 import { initializeChatTerminationService } from './services/chatTerminationService';
 import { connectMongoDB } from './config/mongodb';
@@ -40,7 +42,10 @@ app.use(cors({
   credentials: true
 }));
 
-// Body parsing
+// Webhook routes (need raw body for Stripe signature verification)
+app.use('/api/v1/webhooks', webhookRoutes);
+
+// Body parsing (after webhook routes)
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -63,6 +68,7 @@ app.use('/api/v1/matching', matchingRoutes);
 app.use('/api/v1/chats', chatRoutes);
 app.use('/api/v1/matches', matchRoutes);
 app.use('/api/v1/reports', reportRoutes);
+app.use('/api/v1/subscriptions', subscriptionRoutes);
 
 // ============================================
 // ERROR HANDLING
