@@ -2,6 +2,7 @@ import axios from 'axios';
 import { PrismaClient } from '@prisma/client';
 import { AppError } from '../middleware/errorHandler';
 import { logger } from '../utils/logger';
+import { getWebSocketService } from './websocketService';
 
 const prisma = new PrismaClient();
 
@@ -98,6 +99,16 @@ export class MatchingService {
         const chat = await this.createChat(userId, data.match.user_id);
 
         logger.info(`Match found for user ${userId} with ${data.match.user_id}`);
+
+        // Send WebSocket notification to both users
+        try {
+          const ws = getWebSocketService();
+          ws.notifyMatchFound(userId, chat.id, data.match.user_id);
+          ws.notifyMatchFound(data.match.user_id, chat.id, userId);
+        } catch (error) {
+          logger.error('Error sending WebSocket notification:', error);
+          // Continue even if WebSocket fails
+        }
 
         return {
           matchFound: true,

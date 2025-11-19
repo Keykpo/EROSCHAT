@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuthStore } from '@/store/authStore'
 import { ApiClient } from '@/lib/api'
+import { useWebSocket } from '@/hooks/useWebSocket'
 import { Loader2, Search, Users, Clock, Heart, LogOut } from 'lucide-react'
 
 const MOTIVATIONAL_MESSAGES = [
@@ -32,6 +33,24 @@ export default function HomePage() {
   const [queueStatus, setQueueStatus] = useState<QueueStatus>({ inQueue: false })
   const [currentMessage, setCurrentMessage] = useState(0)
   const [error, setError] = useState('')
+
+  // WebSocket integration for real-time match notifications
+  const { connected } = useWebSocket({
+    onMatchFound: (data) => {
+      console.log('Match found via WebSocket!', data)
+      // Redirect to chat
+      router.push(`/chat/${data.chatId}`)
+    },
+    onQueueUpdate: (data) => {
+      console.log('Queue update via WebSocket:', data)
+      setQueueStatus({
+        inQueue: true,
+        position: data.position,
+        estimatedWaitTime: data.estimatedWaitTime,
+        usersInQueue: data.usersInQueue,
+      })
+    },
+  })
 
   useEffect(() => {
     if (!isAuthenticated) {

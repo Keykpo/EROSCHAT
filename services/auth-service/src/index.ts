@@ -1,4 +1,5 @@
 import express, { Application } from 'express';
+import { createServer } from 'http';
 import helmet from 'helmet';
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -8,12 +9,16 @@ import authRoutes from './routes/authRoutes';
 import userRoutes from './routes/userRoutes';
 import profileRoutes from './routes/profileRoutes';
 import matchingRoutes from './routes/matchingRoutes';
+import { initializeWebSocketService } from './services/websocketService';
 
 // Load environment variables
 dotenv.config();
 
 const app: Application = express();
 const PORT = process.env.PORT || 3001;
+
+// Create HTTP server
+const httpServer = createServer(app);
 
 // ============================================
 // MIDDLEWARE
@@ -58,12 +63,20 @@ app.use('/api/v1/matching', matchingRoutes);
 app.use(errorHandler);
 
 // ============================================
+// WEBSOCKET INITIALIZATION
+// ============================================
+
+// Initialize WebSocket service
+initializeWebSocketService(httpServer);
+
+// ============================================
 // START SERVER
 // ============================================
 
-app.listen(PORT, () => {
+httpServer.listen(PORT, () => {
   logger.info(`🚀 Auth Service running on port ${PORT}`);
   logger.info(`📝 Environment: ${process.env.NODE_ENV}`);
+  logger.info(`🔌 WebSocket server initialized`);
 });
 
 // Handle unhandled promise rejections
