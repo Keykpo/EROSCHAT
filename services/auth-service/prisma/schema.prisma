@@ -1,0 +1,326 @@
+// Ero Chat - Prisma Schema
+// Database: PostgreSQL
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// USERS & AUTHENTICATION
+// ============================================
+
+model User {
+  id                String    @id @default(uuid())
+  email             String    @unique
+  passwordHash      String    @map("password_hash")
+  dateOfBirth       DateTime  @map("date_of_birth")
+  ageVerified       Boolean   @default(false) @map("age_verified")
+  isVerified        Boolean   @default(false) @map("is_verified")
+  isPremium         Boolean   @default(false) @map("is_premium")
+  credits           Int       @default(0)
+  trustScore        Int       @default(50) @map("trust_score")
+
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+  lastActive        DateTime? @map("last_active")
+
+  // Email verification
+  emailVerificationToken String?   @map("email_verification_token")
+  emailVerifiedAt        DateTime? @map("email_verified_at")
+
+  // Password reset
+  passwordResetToken     String?   @map("password_reset_token")
+  passwordResetExpiresAt DateTime? @map("password_reset_expires_at")
+
+  // Relations
+  profile           Profile?
+  chatsAsUserA      Chat[]    @relation("UserAChats")
+  chatsAsUserB      Chat[]    @relation("UserBChats")
+  matchesAsUserA    Match[]   @relation("UserAMatches")
+  matchesAsUserB    Match[]   @relation("UserBMatches")
+  subscriptions     Subscription[]
+  transactions      Transaction[]
+  reportsCreated    Report[]  @relation("ReportsCreated")
+  reportsReceived   Report[]  @relation("ReportsReceived")
+  blocksCreated     Block[]   @relation("BlocksCreated")
+  blocksReceived    Block[]   @relation("BlocksReceived")
+
+  @@index([email])
+  @@map("users")
+}
+
+model Profile {
+  userId            String    @id @map("user_id")
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  username          String    @unique
+  gender            Gender
+  interestedIn      Gender[]  @map("interested_in")
+
+  // Location
+  city              String?
+  region            String?
+  latitude          Float?
+  longitude         Float?
+
+  // Bio & Interests
+  bio               String?   @db.Text
+  interests         String[]  // Array of tags
+
+  // Preferences
+  minAge            Int       @default(18) @map("min_age")
+  maxAge            Int       @default(99) @map("max_age")
+  maxDistance       Int       @default(50) @map("max_distance") // km
+  lookingFor        LookingFor[] @map("looking_for")
+
+  // Revealed info (post-match)
+  photos            Json      @default("[]") // Array of URLs
+  socialLinks       Json?     @map("social_links")
+
+  // Settings
+  showOnlineStatus  Boolean   @default(true) @map("show_online_status")
+  showLastSeen      Boolean   @default(true) @map("show_last_seen")
+  allowLocation     Boolean   @default(true) @map("allow_location")
+
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  @@index([username])
+  @@map("profiles")
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  NON_BINARY
+  OTHER
+}
+
+enum LookingFor {
+  CHAT
+  DATING
+  BOTH
+}
+
+// ============================================
+// CHAT & MATCHING
+// ============================================
+
+model Chat {
+  id                String    @id @default(uuid())
+
+  userAId           String    @map("user_a_id")
+  userA             User      @relation("UserAChats", fields: [userAId], references: [id])
+
+  userBId           String    @map("user_b_id")
+  userB             User      @relation("UserBChats", fields: [userBId], references: [id])
+
+  status            ChatStatus @default(ACTIVE)
+
+  startedAt         DateTime  @default(now()) @map("started_at")
+  endsAt            DateTime? @map("ends_at")
+  matchedAt         DateTime? @map("matched_at")
+  endedAt           DateTime? @map("ended_at")
+
+  timeExtensions    Int       @default(0) @map("time_extensions")
+
+  // Match requests
+  userAWantsMatch   Boolean   @default(false) @map("user_a_wants_match")
+  userBWantsMatch   Boolean   @default(false) @map("user_b_wants_match")
+
+  // Relations
+  match             Match?
+
+  @@unique([userAId, userBId])
+  @@index([status])
+  @@index([endsAt])
+  @@map("chats")
+}
+
+enum ChatStatus {
+  ACTIVE
+  ENDED
+  MATCHED
+}
+
+model Match {
+  id                String    @id @default(uuid())
+
+  userAId           String    @map("user_a_id")
+  userA             User      @relation("UserAMatches", fields: [userAId], references: [id])
+
+  userBId           String    @map("user_b_id")
+  userB             User      @relation("UserBMatches", fields: [userBId], references: [id])
+
+  chatId            String    @unique @map("chat_id")
+  chat              Chat      @relation(fields: [chatId], references: [id])
+
+  status            MatchStatus @default(ACTIVE)
+
+  matchedAt         DateTime  @default(now()) @map("matched_at")
+  unmatchedAt       DateTime? @map("unmatched_at")
+
+  @@unique([userAId, userBId])
+  @@index([status])
+  @@index([userAId])
+  @@index([userBId])
+  @@map("matches")
+}
+
+enum MatchStatus {
+  ACTIVE
+  UNMATCHED
+}
+
+// ============================================
+// PAYMENTS & SUBSCRIPTIONS
+// ============================================
+
+model Subscription {
+  id                String    @id @default(uuid())
+  userId            String    @map("user_id")
+  user              User      @relation(fields: [userId], references: [id])
+
+  tier              SubscriptionTier
+
+  stripeSubscriptionId String? @unique @map("stripe_subscription_id")
+  stripeCustomerId  String?   @map("stripe_customer_id")
+
+  status            SubscriptionStatus @default(ACTIVE)
+
+  currentPeriodStart DateTime @map("current_period_start")
+  currentPeriodEnd   DateTime @map("current_period_end")
+
+  cancelAtPeriodEnd  Boolean  @default(false) @map("cancel_at_period_end")
+  canceledAt        DateTime? @map("canceled_at")
+
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@index([status])
+  @@map("subscriptions")
+}
+
+enum SubscriptionTier {
+  PREMIUM
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELED
+  EXPIRED
+  PAST_DUE
+}
+
+model Transaction {
+  id                String    @id @default(uuid())
+  userId            String    @map("user_id")
+  user              User      @relation(fields: [userId], references: [id])
+
+  type              TransactionType
+  amount            Int       // cents
+  credits           Int?      // if credits purchase
+
+  stripePaymentIntentId String? @unique @map("stripe_payment_intent_id")
+
+  status            TransactionStatus @default(PENDING)
+
+  metadata          Json?
+
+  createdAt         DateTime  @default(now()) @map("created_at")
+  completedAt       DateTime? @map("completed_at")
+
+  @@index([userId])
+  @@index([status])
+  @@map("transactions")
+}
+
+enum TransactionType {
+  SUBSCRIPTION
+  CREDITS
+  BOOST
+  SUPER_LIKE
+  REWIND
+}
+
+enum TransactionStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+// ============================================
+// MODERATION
+// ============================================
+
+model Report {
+  id                String    @id @default(uuid())
+
+  reporterId        String    @map("reporter_id")
+  reporter          User      @relation("ReportsCreated", fields: [reporterId], references: [id])
+
+  reportedId        String    @map("reported_id")
+  reported          User      @relation("ReportsReceived", fields: [reportedId], references: [id])
+
+  chatId            String?   @map("chat_id")
+
+  reason            ReportReason
+  description       String?   @db.Text
+
+  status            ReportStatus @default(PENDING)
+
+  createdAt         DateTime  @default(now()) @map("created_at")
+  reviewedAt        DateTime? @map("reviewed_at")
+  reviewedBy        String?   @map("reviewed_by")
+
+  action            ModerationAction? @map("moderation_action")
+  notes             String?   @db.Text
+
+  @@index([status])
+  @@index([reportedId])
+  @@map("reports")
+}
+
+enum ReportReason {
+  INAPPROPRIATE_CONTENT
+  SPAM
+  HARASSMENT
+  FAKE_PROFILE
+  UNDERAGE
+  OTHER
+}
+
+enum ReportStatus {
+  PENDING
+  REVIEWED
+  RESOLVED
+}
+
+enum ModerationAction {
+  NO_ACTION
+  WARNING
+  TEMPORARY_BAN
+  PERMANENT_BAN
+}
+
+model Block {
+  id                String    @id @default(uuid())
+
+  blockerId         String    @map("blocker_id")
+  blocker           User      @relation("BlocksCreated", fields: [blockerId], references: [id])
+
+  blockedId         String    @map("blocked_id")
+  blocked           User      @relation("BlocksReceived", fields: [blockedId], references: [id])
+
+  createdAt         DateTime  @default(now()) @map("created_at")
+
+  @@unique([blockerId, blockedId])
+  @@index([blockerId])
+  @@map("blocks")
+}
