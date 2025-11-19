@@ -4,6 +4,7 @@ import MessageModel from '../models/Message';
 import { AppError } from '../middleware/errorHandler';
 import { logger } from '../utils/logger';
 import { getWebSocketService } from './websocketService';
+import { ModerationService } from './moderationService';
 
 const prisma = new PrismaClient();
 
@@ -137,6 +138,17 @@ export class ChatService {
         throw new AppError('Message is too long (max 1000 characters)', 400);
       }
 
+      // Moderate content
+      const moderationResult = await ModerationService.moderateText(content.trim());
+
+      if (!moderationResult.allowed) {
+        logger.warn(`Message blocked by moderation: ${content.substring(0, 50)}`);
+        throw new AppError(
+          moderationResult.reason || 'Message violates community guidelines',
+          403
+        );
+      }
+
       // Create message in MongoDB
       const message = await MessageModel.create({
         chatId,
@@ -144,6 +156,8 @@ export class ChatService {
         content: content.trim(),
         type,
         readBy: [userId], // Sender has read it by default
+        moderationStatus: moderationResult.flagged ? 'PENDING' : 'APPROVED',
+        moderationFlags: moderationResult.categories,
       });
 
       // Update last message time in MongoDB chat

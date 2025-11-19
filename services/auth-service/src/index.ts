@@ -11,6 +11,7 @@ import profileRoutes from './routes/profileRoutes';
 import matchingRoutes from './routes/matchingRoutes';
 import chatRoutes from './routes/chatRoutes';
 import matchRoutes from './routes/matchRoutes';
+import reportRoutes from './routes/reportRoutes';
 import { initializeWebSocketService } from './services/websocketService';
 import { initializeChatTerminationService } from './services/chatTerminationService';
 import { connectMongoDB } from './config/mongodb';
@@ -61,6 +62,7 @@ app.use('/api/v1/profiles', profileRoutes);
 app.use('/api/v1/matching', matchingRoutes);
 app.use('/api/v1/chats', chatRoutes);
 app.use('/api/v1/matches', matchRoutes);
+app.use('/api/v1/reports', reportRoutes);
 
 // ============================================
 // ERROR HANDLING

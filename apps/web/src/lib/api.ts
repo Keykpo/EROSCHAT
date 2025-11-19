@@ -263,4 +263,31 @@ export class ApiClient {
   static async getMatchStats() {
     return this.request('/matches/stats', {}, true);
   }
+
+  // ============================================
+  // REPORTS
+  // ============================================
+
+  static async createReport(data: {
+    reportedUserId: string;
+    reason: string;
+    chatId?: string;
+    messageId?: string;
+    description?: string;
+  }) {
+    return this.request('/reports', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }, true);
+  }
+
+  static async getUserReports() {
+    return this.request<{ reports: any[] }>('/reports/my-reports', {}, true);
+  }
+
+  static async blockUser(userId: string) {
+    return this.request(`/users/${userId}/block`, {
+      method: 'POST',
+    }, true);
+  }
 }

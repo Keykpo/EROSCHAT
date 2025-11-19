@@ -37,6 +37,11 @@ model User {
   passwordResetToken     String?   @map("password_reset_token")
   passwordResetExpiresAt DateTime? @map("password_reset_expires_at")
 
+  // Moderation
+  suspendedUntil    DateTime? @map("suspended_until")
+  bannedAt          DateTime? @map("banned_at")
+  warningCount      Int       @default(0) @map("warning_count")
+
   // Relations
   profile           Profile?
   chatsAsUserA      Chat[]    @relation("UserAChats")
