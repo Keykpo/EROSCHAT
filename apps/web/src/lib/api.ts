@@ -241,4 +241,26 @@ export class ApiClient {
   static async getUserActiveChats() {
     return this.request<{ chats: any[] }>('/chats/active', {}, true);
   }
+
+  // ============================================
+  // MATCHES
+  // ============================================
+
+  static async getUserMatches() {
+    return this.request<{ matches: any[] }>('/matches', {}, true);
+  }
+
+  static async getMatchById(matchId: string) {
+    return this.request(`/matches/${matchId}`, {}, true);
+  }
+
+  static async unmatch(matchId: string) {
+    return this.request(`/matches/${matchId}`, {
+      method: 'DELETE',
+    }, true);
+  }
+
+  static async getMatchStats() {
+    return this.request('/matches/stats', {}, true);
+  }
 }

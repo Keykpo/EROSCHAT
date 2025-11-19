@@ -161,13 +161,22 @@ export default function HomePage() {
             </h1>
             <p className="text-sm text-gray-400">Hola, {user.email}</p>
           </div>
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-2 px-4 py-2 text-gray-400 hover:text-white border border-gray-800 hover:bg-background-hover rounded-lg transition-colors"
-          >
-            <LogOut className="w-4 h-4" />
-            Salir
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => router.push('/matches')}
+              className="flex items-center gap-2 px-4 py-2 text-gray-400 hover:text-white border border-gray-800 hover:bg-background-hover rounded-lg transition-colors"
+            >
+              <Heart className="w-4 h-4" />
+              <span className="hidden sm:inline">Matches</span>
+            </button>
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-2 px-4 py-2 text-gray-400 hover:text-white border border-gray-800 hover:bg-background-hover rounded-lg transition-colors"
+            >
+              <LogOut className="w-4 h-4" />
+              Salir
+            </button>
+          </div>
         </div>
       </header>
 

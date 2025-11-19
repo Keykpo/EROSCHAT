@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation'
 import { useAuthStore } from '@/store/authStore'
 import { ApiClient } from '@/lib/api'
 import { useWebSocket } from '@/hooks/useWebSocket'
+import MatchCelebrationModal from '@/components/MatchCelebrationModal'
 import {
   Send,
   Heart,
@@ -48,6 +49,8 @@ export default function ChatPage() {
   const [otherUserTyping, setOtherUserTyping] = useState(false)
   const [timeRemaining, setTimeRemaining] = useState<number>(0)
   const [showMatchRequest, setShowMatchRequest] = useState(false)
+  const [showMatchCelebration, setShowMatchCelebration] = useState(false)
+  const [revealedProfile, setRevealedProfile] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [sending, setSending] = useState(false)
 
@@ -69,7 +72,8 @@ export default function ChatPage() {
       if (data.chatId === chatId) {
         // Match revealed! Show celebration
         setChat((prev) => prev ? { ...prev, status: 'MATCHED' } : null)
-        alert(`¡Es un Match! 🎉\n\nPerfil revelado`)
+        setRevealedProfile(data.profile)
+        setShowMatchCelebration(true)
       }
     },
   })
@@ -441,6 +445,14 @@ export default function ChatPage() {
           </button>
         </form>
       </div>
+
+      {/* Match Celebration Modal */}
+      <MatchCelebrationModal
+        isOpen={showMatchCelebration}
+        onClose={() => setShowMatchCelebration(false)}
+        profile={revealedProfile}
+        chatId={chatId}
+      />
     </div>
   )
 }
