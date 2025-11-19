@@ -6,6 +6,7 @@ import { useAuthStore } from '@/store/authStore'
 import { ApiClient } from '@/lib/api'
 import { useWebSocket } from '@/hooks/useWebSocket'
 import MatchCelebrationModal from '@/components/MatchCelebrationModal'
+import ReportModal from '@/components/ReportModal'
 import {
   Send,
   Heart,
@@ -15,6 +16,8 @@ import {
   Check,
   Loader2,
   ArrowLeft,
+  Flag,
+  MoreVertical,
 } from 'lucide-react'
 
 interface Message {
@@ -53,6 +56,8 @@ export default function ChatPage() {
   const [revealedProfile, setRevealedProfile] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [sending, setSending] = useState(false)
+  const [showReportModal, setShowReportModal] = useState(false)
+  const [showOptionsMenu, setShowOptionsMenu] = useState(false)
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -339,6 +344,31 @@ export default function ChatPage() {
               <span className="text-sm">Esperando...</span>
             </div>
           )}
+
+          {/* Options Menu */}
+          <div className="relative">
+            <button
+              onClick={() => setShowOptionsMenu(!showOptionsMenu)}
+              className="p-2 hover:bg-background-hover rounded-lg transition-colors"
+            >
+              <MoreVertical className="w-5 h-5" />
+            </button>
+
+            {showOptionsMenu && (
+              <div className="absolute right-0 mt-2 w-48 bg-background-card border border-gray-800 rounded-lg shadow-lg z-10">
+                <button
+                  onClick={() => {
+                    setShowOptionsMenu(false)
+                    setShowReportModal(true)
+                  }}
+                  className="w-full flex items-center gap-2 px-4 py-3 hover:bg-background-hover text-left text-red-400 transition-colors"
+                >
+                  <Flag className="w-4 h-4" />
+                  Reportar Usuario
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </header>
 
@@ -452,6 +482,15 @@ export default function ChatPage() {
         onClose={() => setShowMatchCelebration(false)}
         profile={revealedProfile}
         chatId={chatId}
+      />
+
+      {/* Report Modal */}
+      <ReportModal
+        isOpen={showReportModal}
+        onClose={() => setShowReportModal(false)}
+        reportedUserId={chat?.otherUserId || ''}
+        chatId={chatId}
+        username="este usuario"
       />
     </div>
   )
