@@ -7,6 +7,7 @@ import { errorHandler } from './middleware/errorHandler';
 import authRoutes from './routes/authRoutes';
 import userRoutes from './routes/userRoutes';
 import profileRoutes from './routes/profileRoutes';
+import matchingRoutes from './routes/matchingRoutes';
 
 // Load environment variables
 dotenv.config();
@@ -48,6 +49,7 @@ app.get('/health', (req, res) => {
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/profiles', profileRoutes);
+app.use('/api/v1/matching', matchingRoutes);
 
 // ============================================
 // ERROR HANDLING

@@ -159,4 +159,35 @@ export class ApiClient {
       method: 'DELETE',
     }, true);
   }
+
+  // ============================================
+  // MATCHING
+  // ============================================
+
+  static async joinMatchingQueue() {
+    return this.request<{
+      matched: boolean;
+      chatId?: string;
+      queuePosition?: number;
+      estimatedWaitTime?: number;
+      usersInQueue?: number;
+    }>('/matching/join-queue', {
+      method: 'POST',
+    }, true);
+  }
+
+  static async leaveMatchingQueue() {
+    return this.request('/matching/leave-queue', {
+      method: 'DELETE',
+    }, true);
+  }
+
+  static async getMatchingStatus() {
+    return this.request<{
+      inQueue: boolean;
+      position?: number;
+      estimatedWaitTime?: number;
+      usersInQueue?: number;
+    }>('/matching/status', {}, true);
+  }
 }
