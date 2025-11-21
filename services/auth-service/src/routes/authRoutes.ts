@@ -5,16 +5,18 @@ import rateLimit from 'express-rate-limit';
 
 const router = Router();
 
-// Rate limiters
+const isDevelopment = process.env.NODE_ENV === 'development';
+
+// Rate limiters (disabled in development)
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // 5 requests per window
+  max: isDevelopment ? 10000 : 5, // Unlimited in dev
   message: 'Too many attempts, please try again later'
 });
 
 const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100
+  max: isDevelopment ? 10000 : 100
 });
 
 // Public routes

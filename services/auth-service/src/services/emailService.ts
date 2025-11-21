@@ -1,6 +1,8 @@
 import nodemailer from 'nodemailer';
 import { logger } from '../utils/logger';
 
+const isDevelopment = process.env.NODE_ENV === 'development';
+
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
   port: parseInt(process.env.SMTP_PORT || '587'),
@@ -11,12 +13,25 @@ const transporter = nodemailer.createTransport({
   }
 });
 
+// Mock email sending in development
+const sendMailMock = async (options: any) => {
+  logger.info('📧 [DEV] Email would be sent:');
+  logger.info(`   To: ${options.to}`);
+  logger.info(`   Subject: ${options.subject}`);
+  // Extract URL from HTML if present
+  const urlMatch = options.html?.match(/href="([^"]+)"/);
+  if (urlMatch) {
+    logger.info(`   Link: ${urlMatch[1]}`);
+  }
+  return { messageId: 'dev-mock-id' };
+};
+
 export class EmailService {
   static async sendVerificationEmail(email: string, token: string) {
     const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${token}`;
 
     try {
-      await transporter.sendMail({
+      const mailOptions = {
         from: process.env.EMAIL_FROM,
         to: email,
         subject: 'Verify your Ero Chat account',
@@ -35,7 +50,13 @@ export class EmailService {
             </p>
           </div>
         `
-      });
+      };
+
+      if (isDevelopment) {
+        await sendMailMock(mailOptions);
+      } else {
+        await transporter.sendMail(mailOptions);
+      }
 
       logger.info(`Verification email sent to ${email}`);
     } catch (error) {
@@ -48,7 +69,7 @@ export class EmailService {
     const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
 
     try {
-      await transporter.sendMail({
+      const mailOptions = {
         from: process.env.EMAIL_FROM,
         to: email,
         subject: 'Reset your Ero Chat password',
@@ -67,7 +88,13 @@ export class EmailService {
             </p>
           </div>
         `
-      });
+      };
+
+      if (isDevelopment) {
+        await sendMailMock(mailOptions);
+      } else {
+        await transporter.sendMail(mailOptions);
+      }
 
       logger.info(`Password reset email sent to ${email}`);
     } catch (error) {
@@ -78,7 +105,7 @@ export class EmailService {
 
   static async sendWelcomeEmail(email: string, username: string) {
     try {
-      await transporter.sendMail({
+      const mailOptions = {
         from: process.env.EMAIL_FROM,
         to: email,
         subject: 'Welcome to Ero Chat! 🎉',
@@ -101,7 +128,13 @@ export class EmailService {
             </p>
           </div>
         `
-      });
+      };
+
+      if (isDevelopment) {
+        await sendMailMock(mailOptions);
+      } else {
+        await transporter.sendMail(mailOptions);
+      }
 
       logger.info(`Welcome email sent to ${email}`);
     } catch (error) {

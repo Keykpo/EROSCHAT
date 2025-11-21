@@ -118,8 +118,8 @@ export class AuthService {
       throw new AppError('Invalid credentials', 401);
     }
 
-    // Check if email is verified
-    if (!user.isVerified) {
+    // Check if email is verified (skip in development)
+    if (!user.isVerified && process.env.NODE_ENV !== 'development') {
       throw new AppError('Please verify your email before logging in', 403);
     }
 

@@ -5,7 +5,21 @@
       "Bash(docker-compose up:*)",
       "Bash(docker:*)",
       "Bash(dir:*)",
-      "Bash(nul)"
+      "Bash(nul)",
+      "Bash(npx next dev:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(taskkill:*)",
+      "Bash(cmd /c \"taskkill /PID 28904 /F\")",
+      "Bash(npm run dev:auth:*)",
+      "Bash(npm run dev:chat:*)",
+      "Bash(npm run prisma:generate:*)",
+      "Bash(powershell -Command \"Stop-Process -Id 28904 -Force\")",
+      "Bash(npm run prisma:migrate:*)",
+      "Bash(npx prisma db push)",
+      "Bash(powershell -Command \"Stop-Process -Id 8516 -Force\")",
+      "Bash(powershell -Command \"Stop-Process -Id 29584 -Force\")",
+      "Bash(curl:*)"
     ],
     "deny": [],
     "ask": []
